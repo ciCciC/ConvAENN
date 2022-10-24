@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from data.exampleData import ExampleData
+from exampleData import ExampleData
 
 name = 'Data'
 

@@ -1,8 +1,8 @@
 import streamlit as st
 from random import random
-from network.anomAeModel import AnomalyAeModel
+from anomAeModel import AnomalyAeModel
 from keras.optimizers import Adam
-from data.exampleData import ExampleData
+from exampleData import ExampleData
 import plotly.express as px
 
 name = 'Train'

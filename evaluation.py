@@ -3,7 +3,7 @@ import numpy as np
 from keras.models import load_model
 from keras.losses import mae
 import streamlit as st
-from data.exampleData import ExampleData
+from exampleData import ExampleData
 import glob
 import tensorflow as tf
 from sklearn.metrics import accuracy_score, precision_score, recall_score

@@ -1,6 +1,9 @@
 import streamlit as st
+
+import evaluation
+import home
+import train
 from router import RouterController
-import home, train, evaluation
 
 st.set_page_config(page_title='Anomaly Detector System', layout="wide")
 
