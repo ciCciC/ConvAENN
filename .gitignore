@@ -1,4 +1,4 @@
 # Project exclude paths
 /data/
 .idea
-.DS_store
+/.DS_store
