@@ -111,7 +111,7 @@ def plot_loss(model, normal_train, threshold):
 
 def model_selector():
     file_paths = {file_path.split('/')[-1]: file_path for file_path in
-                  glob.glob('anomalyDetectorApp/model/anomaly-detector-*')}
+                  glob.glob('./model/anomaly-detector-*')}
     option = st.selectbox('Select model', ['<select>'] + list(file_paths.keys()))
     file_path = None
 
