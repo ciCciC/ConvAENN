@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 from src.data.exampleData import ExampleData
 
@@ -18,9 +19,19 @@ def app():
         'Test': exampleData.test_data.numpy().shape
     }, index=['Rows', 'Columns'])
 
+    unique, counts = np.unique(exampleData.labels, return_counts=True)
+    label_balance = pd.DataFrame({
+        'label': unique.astype(int),
+        'count': counts
+    })
+
     columns = st.columns(2)
     with columns[0]:
+        st.markdown('Data ratio')
         st.dataframe(shapes)
+        st.markdown('Label ratio')
+        st.dataframe(label_balance)
+
 
     w = 200
     h = 200
