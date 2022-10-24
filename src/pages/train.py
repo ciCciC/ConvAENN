@@ -1,4 +1,5 @@
 import streamlit as st
+from tensorflow import keras
 from random import random
 from src.nnetwork.anomAeModel import AnomalyAeModel
 from keras.optimizers import Adam

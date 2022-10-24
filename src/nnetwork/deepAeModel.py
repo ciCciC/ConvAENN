@@ -1,3 +1,4 @@
+from tensorflow import keras
 from keras import layers
 from keras.datasets import mnist, fashion_mnist
 import numpy as np
