@@ -31,11 +31,11 @@ Train page
 <img src="images/11.png" width="600" height="400">
 
 <br/>
-Evaluate page
+Evaluate page part 1
 <br/>
 <img src="images/metrics.png" width="600" height="400">
 
 <br/>
-Evaluate page
+Evaluate page part 2
 <br/>
-<img src="images/anomaly.png" width="600" height="400">
+<img src="images/evaluate.png" width="600" height="400">
