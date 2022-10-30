@@ -32,7 +32,6 @@ def app():
         st.markdown('Label ratio')
         st.dataframe(label_balance)
 
-
     w = 200
     h = 200
 
@@ -42,5 +41,3 @@ def app():
 
         st.text('Anomaly ECG')
         st.line_chart(anom_test[0], width=w, height=h)
-
-

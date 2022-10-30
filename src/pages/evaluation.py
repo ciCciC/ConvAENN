@@ -6,7 +6,7 @@ import streamlit as st
 from src.data.exampleData import ExampleData
 import glob
 import tensorflow as tf
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 
 name = 'Evaluate'
 
@@ -23,9 +23,9 @@ def app() -> None:
     train_data, test_data, normal_train, normal_test, anom_train, anom_test = exampleData.get_all_training_data()
 
     threshold = get_threshold(model, normal_train)
-    accuracy, precision, recall = model_evaluation(model, test_data, threshold, exampleData.test_labels)
+    accuracy, precision, recall, auc = model_evaluation(model, test_data, threshold, exampleData.test_labels)
 
-    plot_metrics(accuracy, precision, recall, threshold)
+    plot_metrics(accuracy, precision, recall, auc, threshold)
     plot_loss(model, normal_train, threshold)
 
     normal_selected_data = None
@@ -63,15 +63,27 @@ def app() -> None:
     plot_data(selected_label, selected_data, decoded, is_normal)
 
 
-def plot_metrics(accuracy, precision, recall, threshold):
-    acc, prec, rec, thresh = st.columns(4)
+def individual_metrics(selected_label, is_normal, decoded, selected_data):
+    mean_absolute_error = mae(decoded, selected_data).numpy()[0]
+    text_mae = "Mean Absolute Error: {:.4f}".format(mean_absolute_error)
+    text_selected = f"Selected: {selected_label}"
+    text_predicts = f'Model predicts: {"Normal" if is_normal else "Abnormal"}'
+
+    return f"{text_mae} ||| {text_selected} ||| {text_predicts}"
+
+
+def plot_metrics(accuracy, precision, recall, auc, threshold):
+    acc, prec, rec, roc_auc, thresh = st.columns(5)
     acc.metric("Accuracy", round(accuracy, 2))
     prec.metric("Precision", round(precision, 2))
     rec.metric("Recall", round(recall, 2))
+    roc_auc.metric("AUC", round(auc, 2))
     thresh.metric("Threshold", str(threshold)[:6])
 
 
 def plot_data(selected_label, selected_data, decoded, is_normal):
+    title = individual_metrics(selected_label, is_normal, decoded, selected_data)
+
     x = np.arange(0, selected_data[0].shape[0])
     fig = go.Figure(data=go.Scatter(
         x=x,
@@ -89,8 +101,11 @@ def plot_data(selected_label, selected_data, decoded, is_normal):
         name='Error'
     ))
 
-    st.text(f"Selected: {selected_label}")
-    st.text(f"Model predicts: {'Normal' if is_normal else 'Anomaly'}")
+    fig.update_layout(
+        dict(
+            title=title
+        )
+    )
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -153,6 +168,10 @@ def predictions(model, data, threshold):
     :return: boolean
     """
     reconstructions = model(data)
+    return loss(reconstructions, data, threshold)
+
+
+def loss(reconstructions, data, threshold):
     loss = mae(reconstructions, data)
     return tf.math.less(loss, threshold)
 
@@ -169,4 +188,5 @@ def model_evaluation(model, data, threshold, labels):
     preds = predictions(model, data, threshold)
     return accuracy_score(labels, preds), \
            precision_score(labels, preds), \
-           recall_score(labels, preds)
+           recall_score(labels, preds), \
+           roc_auc_score(labels, preds)

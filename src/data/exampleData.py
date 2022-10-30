@@ -6,8 +6,8 @@ from sklearn.model_selection import train_test_split
 class ExampleData:
 
     def __init__(self):
-        dataframe = pd.read_csv('https://storage.googleapis.com/download.tensorflow.org/data/ecg.csv', header=None)
-        self.raw_data = dataframe.values
+        self.dataframe = pd.read_csv('https://storage.googleapis.com/download.tensorflow.org/data/ecg.csv', header=None)
+        self.raw_data = self.dataframe.values
         self.labels = self.raw_data[:, -1]
         self.data = self.raw_data[:, :-1]
 
