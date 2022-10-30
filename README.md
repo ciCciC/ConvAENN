@@ -33,7 +33,7 @@ Train page
 <br/>
 Evaluate page part 1
 <br/>
-<img src="images/metrics.png" width="600" height="400">
+<img src="images/metric.png" width="600" height="400">
 
 <br/>
 Evaluate page part 2
