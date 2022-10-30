@@ -28,7 +28,7 @@ Data page
 <br/>
 Train page
 <br/>
-<img src="images/1.png" width="600" height="400">
+<img src="images/11.png" width="600" height="400">
 
 <br/>
 Evaluate page
