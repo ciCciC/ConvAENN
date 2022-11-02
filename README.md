@@ -1,8 +1,7 @@
 # Anomaly Detector app
 
 ## Models
-- Deep Convolutional AutoEncoder Neural Network
-- Anomaly Detector Dense AutoEncoder Neural Network
+- [Anomaly Detector Dense AutoEncoder Neural Network](https://github.com/ciCciC/ConvAENN/blob/master/src/nnetwork/anomAeModel.py)
 
 ## Prerequisite
 - install miniforge
