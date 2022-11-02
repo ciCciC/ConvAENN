@@ -1,4 +1,4 @@
-# Anomaly Detector app
+# Anomaly Detector app for Electrocardiogram (ECG)
 
 ## Models
 - [Anomaly Detector Dense AutoEncoder Neural Network](https://github.com/ciCciC/ConvAENN/blob/master/src/nnetwork/anomAeModel.py)
