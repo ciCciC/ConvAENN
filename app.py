@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.pages import train, evaluation, home
+from src.pages import train, evaluation, data
 from src.router import RouterController
 
 
@@ -11,7 +11,7 @@ def config():
 def main():
     config()
     app = RouterController()
-    app.add_page(home.name, home.app)
+    app.add_page(data.name, data.app)
     app.add_page(train.name, train.app)
     app.add_page(evaluation.name, evaluation.app)
     app.run()

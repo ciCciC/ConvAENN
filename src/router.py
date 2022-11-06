@@ -6,6 +6,9 @@ class RouterController:
     def __init__(self):
         self.pages = []
 
+        if 'DATASET_TYPE' not in st.session_state:
+            st.session_state['DATASET_TYPE'] = ''
+
     def add_page(self, title, func) -> None:
         self.pages.append({
             'title': title,
@@ -20,3 +23,5 @@ class RouterController:
         )
 
         page['function']()
+
+        st.sidebar.text(f'Chosen data set: \n {st.session_state["DATASET_TYPE"]}')
