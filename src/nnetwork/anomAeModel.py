@@ -1,4 +1,3 @@
-from tensorflow import keras
 from keras import Model, layers
 from keras import Sequential
 

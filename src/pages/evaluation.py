@@ -1,14 +1,15 @@
-import plotly.graph_objects as go
+import streamlit as st
+import glob
+import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
+import tensorflow as tf
 from keras.models import load_model
 from keras.losses import mae
-import streamlit as st
-from src.data.exampleData import ExampleData
-import glob
-import tensorflow as tf
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
+from src.utils.configuration import metric_file_path, loss_file_path
 
-name = 'Evaluate'
+name = 'Evaluation'
 
 
 def app() -> None:
@@ -17,16 +18,33 @@ def app() -> None:
     if file_path is None:
         return
 
-    model = model_loader(file_path)
+    # load model
+    model = load_model(file_path)
 
-    exampleData = ExampleData()
-    train_data, test_data, normal_train, normal_test, anom_train, anom_test = exampleData.get_all_training_data()
+    # load metric
+    df_metric = pd.read_csv(metric_file_path)
+    model_metric = df_metric[df_metric.Model == file_path].iloc[0, :]
 
-    threshold = get_threshold(model, normal_train)
-    accuracy, precision, recall, auc = model_evaluation(model, test_data, threshold, exampleData.test_labels)
+    df_loss = pd.read_csv(loss_file_path)
+    model_loss = df_loss[df_loss.Model == file_path]
+
+    default_data = st.session_state['DATASET']
+    train_data, test_data, normal_train, normal_test, anom_train, anom_test = default_data.get_all_data()
+
+    # Certain datasets might have large test set, in order to not freeze streamlit app we will only use 400
+    max_test_data = 400
+    normal_test = normal_test[:max_test_data] if normal_test.shape[0] > max_test_data else normal_test
+    anom_test = anom_test[:max_test_data] if anom_test.shape[0] > max_test_data else anom_test
+
+    # determine threshold using the normal data
+    threshold = model_metric.Threshold
+    train_loss = model_loss.Loss
+
+    # evaluate the model given the test data, threshold and test labels
+    accuracy, precision, recall, auc = model_metric[['Accuracy', 'Precision', 'Recall', 'AUC']]
 
     plot_metrics(accuracy, precision, recall, auc, threshold)
-    plot_loss(model, normal_train, threshold)
+    plot_loss(threshold, train_loss)
 
     normal_selected_data = None
     anomaly_selected_data = None
@@ -40,6 +58,7 @@ def app() -> None:
         anomaly_selected_data = st.selectbox('Select anomaly data', [None] + list(range(0, max_data)))
 
     if normal_selected_data is not None and anomaly_selected_data is not None:
+        # No need to continue on the upcoming code lines
         st.error('Please select normal or anomaly')
         return
 
@@ -51,14 +70,12 @@ def app() -> None:
         selected_data = anom_test[anomaly_selected_data]
         selected_label = 'Anomaly'
     else:
+        # No need to continue on the upcoming code lines
         return
 
     selected_data = np.expand_dims(selected_data, axis=0)
 
-    is_normal = predictions(model, selected_data, threshold)
-
-    encoded = model.encoder(selected_data).numpy()
-    decoded = model.decoder(encoded).numpy()
+    is_normal, decoded = predictions(model, selected_data, threshold)
 
     plot_data(selected_label, selected_data, decoded, is_normal)
 
@@ -110,20 +127,6 @@ def plot_data(selected_label, selected_data, decoded, is_normal):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def plot_loss(model, normal_train, threshold):
-    reconstructions = model.predict(normal_train)
-    train_loss = mae(reconstructions, normal_train)
-
-    fig = go.Figure(data=go.Histogram(x=train_loss, nbinsx=50))
-    fig.add_vline(x=threshold, line_dash="dash", line_color="red")
-    fig.update_layout(
-        xaxis_title_text='Train loss',
-        yaxis_title_text='Number of examples',
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-
 def model_selector():
     file_paths = {file_path.split('/')[-1]: file_path for file_path in
                   glob.glob('./model/anomaly-detector-*')}
@@ -136,18 +139,20 @@ def model_selector():
     return file_path
 
 
-def model_loader(file_path):
-    """
-    Model loader from path
-    :param file_path: file path
-    :return: loaded model
-    """
-    return load_model(file_path)
+def plot_loss(threshold, train_loss):
+    fig = go.Figure(data=go.Histogram(x=train_loss, nbinsx=50))
+    fig.add_vline(x=threshold, line_dash="dash", line_color="red")
+    fig.update_layout(
+        xaxis_title_text='Train loss',
+        yaxis_title_text='Number of examples',
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def get_threshold(model, normal_train_data):
     """
-    Here we define the threshold to determine whether a data is normal or anomaly.
+    Here we auto define the threshold to determine whether a data is normal or anomaly.
     Anomaly will be determined when it's above a threshold.
     :param model: trained model
     :param normal_train_data: normal data
@@ -155,8 +160,14 @@ def get_threshold(model, normal_train_data):
     """
     reconstructions = model.predict(normal_train_data)
     train_loss = mae(reconstructions, normal_train_data)
-    threshold = np.mean(train_loss) + np.std(train_loss)
-    return threshold
+    # threshold = np.mean(train_loss) + np.std(train_loss)
+    threshold = 3 * np.std(train_loss)
+    return threshold, train_loss
+
+
+def calc_is_normal(reconstructions, data, threshold):
+    loss = mae(reconstructions, data)
+    return tf.math.less(loss, threshold)
 
 
 def predictions(model, data, threshold):
@@ -168,12 +179,7 @@ def predictions(model, data, threshold):
     :return: boolean
     """
     reconstructions = model(data)
-    return loss(reconstructions, data, threshold)
-
-
-def loss(reconstructions, data, threshold):
-    loss = mae(reconstructions, data)
-    return tf.math.less(loss, threshold)
+    return calc_is_normal(reconstructions, data, threshold), reconstructions
 
 
 def model_evaluation(model, data, threshold, labels):
@@ -185,7 +191,7 @@ def model_evaluation(model, data, threshold, labels):
     :param labels: labels
     :return: accuracy, precision and recall
     """
-    preds = predictions(model, data, threshold)
+    preds, reconstructions = predictions(model, data, threshold)
     return accuracy_score(labels, preds), \
            precision_score(labels, preds), \
            recall_score(labels, preds), \
