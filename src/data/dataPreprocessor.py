@@ -1,6 +1,7 @@
 import tensorflow as tf
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from src.utils.configuration import parquet_engine
 
 
 class DataPreprocessor:
@@ -12,7 +13,7 @@ class DataPreprocessor:
     def __init__(self, file_path: str):
         is_ecg = file_path.__contains__('ecg')
 
-        self.dataframe = pd.read_csv(file_path, header=None) if is_ecg else pd.read_csv(file_path)
+        self.dataframe = pd.read_parquet(file_path, engine=parquet_engine)
         self.raw_data = self.dataframe.values
         self.labels = self.raw_data[:, -1] if is_ecg else 1 - self.raw_data[:, -1]
         self.data = self.raw_data[:, :-1] if is_ecg else self.raw_data[:, 1:-1]

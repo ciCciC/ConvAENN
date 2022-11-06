@@ -16,11 +16,11 @@ def app():
 
     st.header('Anomaly Detector System with AutoEncoder Model')
 
-    csv_files = {x.split('/')[-1].split('.')[0]: x for x in glob.glob('src/resources/*_data.csv')}
+    parquet_files = {x.split('/')[-1].split('.')[0]: x for x in glob.glob('src/resources/*_data.parquet')}
 
-    selected_data_set = st.selectbox('Select data set', csv_files.keys())
+    selected_data_set = st.selectbox('Select data set', parquet_files.keys())
 
-    st.session_state['FILE_PATH'] = csv_files[selected_data_set]
+    st.session_state['FILE_PATH'] = parquet_files[selected_data_set]
     st.session_state['DATASET_TYPE'] = 'ECG' if selected_data_set.__contains__('ecg') else 'Creditcard'
 
     st.session_state['DATASET'] = DataPreprocessor(st.session_state['FILE_PATH'])

@@ -7,7 +7,7 @@ from keras.callbacks import EarlyStopping
 import plotly.graph_objects as go
 from src.nnetwork.anomAeModel import AnomalyAeModel
 from src.pages.evaluation import model_evaluation, get_threshold, plot_metrics
-from src.utils.configuration import metric_file_path, loss_file_path
+from src.utils.configuration import metric_file_path, loss_file_path, parquet_engine
 
 name = 'Train'
 
@@ -152,11 +152,11 @@ def store_metrics(model_path, accuracy, precision, recall, auc, threshold, train
         df_metric = pd.DataFrame(new_metric_data)
         df_loss = pd.DataFrame(new_loss_data)
 
-        df_metric.to_csv(metric_file_path, index=False)
-        df_loss.to_csv(loss_file_path, index=False)
+        df_metric.to_parquet(metric_file_path, index=False, engine=parquet_engine)
+        df_loss.to_parquet(loss_file_path, index=False, engine=parquet_engine)
     else:
-        df_metric = pd.read_csv(metric_file[0])
-        df_loss = pd.read_csv(loss_file[0])
+        df_metric = pd.read_parquet(metric_file[0], engine=parquet_engine)
+        df_loss = pd.read_parquet(loss_file[0], engine=parquet_engine)
 
         does_metric_model_exist = df_metric[df_metric.Model == model_path].shape[0] > 0
         does_loss_model_exist = df_loss[df_loss.Model == model_path].shape[0] > 0
@@ -166,8 +166,8 @@ def store_metrics(model_path, accuracy, precision, recall, auc, threshold, train
             df_metric = pd.concat([df_metric, pd.DataFrame(new_metric_data)], ignore_index=True, axis=0)
             df_loss = pd.concat([df_loss, pd.DataFrame(new_loss_data)], ignore_index=True, axis=0)
 
-            df_metric.to_csv(metric_file_path, index=False)
-            df_loss.to_csv(loss_file_path, index=False)
+            df_metric.to_parquet(metric_file_path, index=False, engine=parquet_engine)
+            df_loss.to_parquet(loss_file_path, index=False, engine=parquet_engine)
 
 
 def plot_loss(epochs):

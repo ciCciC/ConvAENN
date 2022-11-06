@@ -7,7 +7,7 @@ import tensorflow as tf
 from keras.models import load_model
 from keras.losses import mae
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
-from src.utils.configuration import metric_file_path, loss_file_path
+from src.utils.configuration import metric_file_path, loss_file_path, parquet_engine
 
 name = 'Evaluation'
 
@@ -22,10 +22,10 @@ def app() -> None:
     model = load_model(file_path)
 
     # load metric
-    df_metric = pd.read_csv(metric_file_path)
+    df_metric = pd.read_parquet(metric_file_path, engine=parquet_engine)
     model_metric = df_metric[df_metric.Model == file_path].iloc[0, :]
 
-    df_loss = pd.read_csv(loss_file_path)
+    df_loss = pd.read_parquet(loss_file_path, engine=parquet_engine)
     model_loss = df_loss[df_loss.Model == file_path]
 
     default_data = st.session_state['DATASET']
