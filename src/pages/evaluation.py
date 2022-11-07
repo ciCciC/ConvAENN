@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import tensorflow as tf
 from keras.models import load_model
 from keras.losses import mae
-from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, f1_score
 from src.utils.configuration import metric_file_path, loss_file_path, parquet_engine
 
 name = 'Evaluation'
@@ -41,9 +41,9 @@ def app() -> None:
     train_loss = model_loss.Loss
 
     # evaluate the model given the test data, threshold and test labels
-    accuracy, precision, recall, auc = model_metric[['Accuracy', 'Precision', 'Recall', 'AUC']]
+    accuracy, precision, recall, f1, auc = model_metric[['Accuracy', 'Precision', 'Recall', 'F1', 'AUC']]
 
-    plot_metrics(accuracy, precision, recall, auc, threshold)
+    plot_metrics(accuracy, precision, recall, f1, auc, threshold)
     plot_loss(threshold, train_loss, x_label='Train loss, NORMAL')
 
     normal_selected_data = None
@@ -90,11 +90,12 @@ def individual_metrics(selected_label, is_normal, decoded, selected_data):
     return f"{text_mae} ||| {text_selected} ||| {text_predicts}"
 
 
-def plot_metrics(accuracy, precision, recall, auc, threshold):
-    acc, prec, rec, roc_auc, thresh = st.columns(5)
+def plot_metrics(accuracy, precision, recall, f1, auc, threshold):
+    acc, prec, rec, f, roc_auc, thresh = st.columns(6)
     acc.metric("Accuracy", round(accuracy, 2))
     prec.metric("Precision", round(precision, 2))
     rec.metric("Recall", round(recall, 2))
+    f.metric("F1", round(f1, 2))
     roc_auc.metric("AUC", round(auc, 2))
     thresh.metric("Threshold", str(threshold)[:6])
 
@@ -192,4 +193,5 @@ def model_evaluation(model, data, threshold, labels):
     return accuracy_score(labels, preds), \
            precision_score(labels, preds), \
            recall_score(labels, preds), \
-           roc_auc_score(labels, preds)
+           roc_auc_score(labels, preds), \
+           f1_score(labels, preds)

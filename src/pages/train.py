@@ -44,7 +44,7 @@ def app():
                     model=st.session_state['MODEL'], normal_train_data=normal_train)
 
                 # calc metrics
-                accuracy, precision, recall, auc = model_evaluation(
+                accuracy, precision, recall, auc, f1 = model_evaluation(
                     model=st.session_state['MODEL'],
                     data=test_data, threshold=threshold, labels=test_labels)
 
@@ -52,6 +52,7 @@ def app():
                 st.session_state['ACCURACY'] = accuracy
                 st.session_state['PRECISION'] = precision
                 st.session_state['RECALL'] = recall
+                st.session_state['F1'] = f1
                 st.session_state['AUC'] = auc
                 st.session_state['THRESHOLD'] = threshold
                 st.session_state['LOSS'] = train_loss
@@ -69,6 +70,7 @@ def app():
                               st.session_state['ACCURACY'],
                               st.session_state['PRECISION'],
                               st.session_state['RECALL'],
+                              st.session_state['F1'],
                               st.session_state['AUC'],
                               st.session_state['THRESHOLD'],
                               st.session_state['LOSS'])
@@ -78,6 +80,7 @@ def app():
     plot_metrics(st.session_state['ACCURACY'],
                  st.session_state['PRECISION'],
                  st.session_state['RECALL'],
+                 st.session_state['F1'],
                  st.session_state['AUC'],
                  st.session_state['THRESHOLD'])
 
@@ -97,6 +100,8 @@ def init_states():
         st.session_state['PRECISION'] = 0
     if 'RECALL' not in st.session_state:
         st.session_state['RECALL'] = 0
+    if 'F1' not in st.session_state:
+        st.session_state['F1'] = 0
     if 'AUC' not in st.session_state:
         st.session_state['AUC'] = 0
     if 'THRESHOLD' not in st.session_state:
@@ -125,7 +130,7 @@ def train_model(epochs, normal_train, test_data):
     st.session_state['MODEL'] = model
 
 
-def store_metrics(model_path, accuracy, precision, recall, auc, threshold, train_loss):
+def store_metrics(model_path, accuracy, precision, recall, f1, auc, threshold, train_loss):
     # check existence
     metric_file = glob.glob(metric_file_path)
     loss_file = glob.glob(loss_file_path)
@@ -138,6 +143,7 @@ def store_metrics(model_path, accuracy, precision, recall, auc, threshold, train
         'Accuracy': [round(accuracy, 2)],
         'Precision': [round(precision, 2)],
         'Recall': [round(recall, 2)],
+        'F1': [round(f1, 2)],
         'AUC': [round(auc, 2)],
         'Threshold': [float(str(threshold)[:6])]
     }
