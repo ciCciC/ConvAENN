@@ -25,7 +25,6 @@ def app():
     buttons = st.columns(2)
 
     with buttons[0]:
-        # st.button('Train', on_click=train_model, args=(epochs, normal_train, test_data))
         if st.button('Train'):
             train_model(epochs, normal_train, test_data)
 
@@ -109,7 +108,7 @@ def init_states():
 def train_model(epochs, normal_train, test_data):
     optimizer = Adam()
     loss = 'mae'
-    early_stop = EarlyStopping(monitor='val_loss', patience=3)
+    early_stop = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
     units = normal_train.shape[-1]
 
