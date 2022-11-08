@@ -3,10 +3,9 @@ import glob
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import tensorflow as tf
 from keras.models import load_model
 from keras.losses import mae
-from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, f1_score
+from src.utils.evaluator import plot_metrics, predictions
 from src.utils.configuration import metric_file_path, loss_file_path, parquet_engine
 
 name = 'Evaluation'
@@ -90,16 +89,6 @@ def individual_metrics(selected_label, is_normal, decoded, selected_data):
     return f"{text_mae} ||| {text_selected} ||| {text_predicts}"
 
 
-def plot_metrics(accuracy, precision, recall, f1, auc, threshold):
-    acc, prec, rec, f, roc_auc, thresh = st.columns(6)
-    acc.metric("Accuracy", round(accuracy, 2))
-    prec.metric("Precision", round(precision, 2))
-    rec.metric("Recall", round(recall, 2))
-    f.metric("F1", round(f1, 2))
-    roc_auc.metric("AUC", round(auc, 2))
-    thresh.metric("Threshold", str(threshold)[:6])
-
-
 def plot_data(selected_label, selected_data, decoded, is_normal):
     title = individual_metrics(selected_label, is_normal, decoded, selected_data)
 
@@ -146,52 +135,3 @@ def plot_loss(threshold, loss, x_label='Loss', y_label='Number of examples'):
     )
 
     st.plotly_chart(fig, use_container_width=True)
-
-
-def get_threshold(model, normal_train_data):
-    """
-    Here we auto define the threshold to determine whether a data is normal or anomaly.
-    Anomaly will be determined when it's above a threshold.
-    :param model: trained model
-    :param normal_train_data: normal data
-    :return: threshold
-    """
-    reconstructions = model.predict(normal_train_data)
-    train_loss = mae(reconstructions, normal_train_data)
-    # threshold = np.mean(train_loss) + np.std(train_loss)
-    threshold = 3 * np.std(train_loss)
-    return threshold, train_loss
-
-
-def calc_is_normal(reconstructions, data, threshold):
-    loss = mae(reconstructions, data)
-    return tf.math.less(loss, threshold)
-
-
-def predictions(model, data, threshold):
-    """
-    If the loss is lower than the threshold then normal otherwise anomaly
-    :param model: trained model
-    :param data: data
-    :param threshold: determined threshold
-    :return: boolean
-    """
-    reconstructions = model(data)
-    return calc_is_normal(reconstructions, data, threshold), reconstructions
-
-
-def model_evaluation(model, data, threshold, labels):
-    """
-    Model evaluator
-    :param model: trained model
-    :param data: test data
-    :param threshold: threshold
-    :param labels: labels
-    :return: accuracy, precision and recall
-    """
-    preds, reconstructions = predictions(model, data, threshold)
-    return accuracy_score(labels, preds), \
-           precision_score(labels, preds), \
-           recall_score(labels, preds), \
-           roc_auc_score(labels, preds), \
-           f1_score(labels, preds)

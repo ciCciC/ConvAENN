@@ -6,7 +6,7 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 import plotly.graph_objects as go
 from src.nnetwork.anomAeModel import AnomalyAeModel
-from src.pages.evaluation import model_evaluation, get_threshold, plot_metrics
+from src.utils.evaluator import model_evaluation, get_threshold, plot_metrics
 from src.utils.configuration import metric_file_path, loss_file_path, parquet_engine
 
 name = 'Train'
@@ -15,9 +15,9 @@ name = 'Train'
 def app():
     init_states()
 
-    st.header('Train an Anomaly Detector with AutoEncoder')
+    st.header('Train an Anomaly Detection system with AutoEncoder')
 
-    epochs = st.slider('How many epochs to train?', 10, 100, 20)
+    epochs = st.slider('How many epochs to train?', 10, 500, 20)
 
     data_preprocessor = st.session_state['DATASET']
     train_data, test_data, normal_train, normal_test, anom_train, anom_test = data_preprocessor.get_all_data()

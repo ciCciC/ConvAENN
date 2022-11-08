@@ -1,10 +1,10 @@
+import numpy as np
 import pandas as pd
 from src.utils.configuration import parquet_engine, credit_data_path, ecg_data_path
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from abc import ABC, abstractmethod
-from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 
 
@@ -23,7 +23,7 @@ class BasePreprocessor(ABC):
 
     def _train_split_data(self):
         self.train_data, self.test_data, self.train_labels, self.test_labels = train_test_split(
-            self.data, self.labels, test_size=0.2, random_state=21
+            self.data, self.labels, test_size=0.2, stratify=self.labels, random_state=21
         )
 
     def _split_normal_and_anomalies(self):
@@ -41,6 +41,33 @@ class BasePreprocessor(ABC):
 
     def get_all_data(self):
         return self.train_data, self.test_data, self.normal_train, self.normal_test, self.anom_train, self.anom_test
+
+    def get_normalized_data(self):
+        x_stacked = np.vstack((self.train_data.numpy(), self.test_data.numpy()))
+        y_stacked = np.vstack((np.expand_dims(self.train_labels, axis=1), np.expand_dims(self.test_labels, axis=1)))
+        all_norm_data = np.hstack((x_stacked, y_stacked))
+
+        normal_idx = np.where(all_norm_data[:, -1] == 0)[0]
+        anomaly_idx = np.where(all_norm_data[:, -1] == 1)[0]
+
+        under_sampled_idx = None
+        normal = None
+        anomaly = None
+
+        if len(normal_idx) > len(anomaly_idx):
+            under_sampled_idx = np.random.choice(normal_idx, len(anomaly_idx), replace=False)
+            normal = all_norm_data[under_sampled_idx]
+            anomaly = all_norm_data[anomaly_idx]
+        else:
+            under_sampled_idx = np.random.choice(anomaly_idx, len(normal_idx), replace=False)
+            normal = all_norm_data[normal_idx]
+            anomaly = all_norm_data[under_sampled_idx]
+
+        evenly_distributed = np.vstack((normal, anomaly))
+        data = evenly_distributed[:, :-1]
+        labels = evenly_distributed[:, -1]
+
+        return data, labels
 
 
 class CreditProcessor(BasePreprocessor):
@@ -60,10 +87,8 @@ class CreditProcessor(BasePreprocessor):
         self._split_normal_and_anomalies()
 
     def _over_under_sample(self):
-        over_sampler = SMOTE(sampling_strategy=.1, n_jobs=-1)
-        under_sampler = RandomUnderSampler(sampling_strategy=.3)
-        x_over, y_over = over_sampler.fit_resample(self.data, self.labels)
-        self.data, self.labels = under_sampler.fit_resample(x_over, y_over)
+        under_sampler = RandomUnderSampler(sampling_strategy=.1)
+        self.data, self.labels = under_sampler.fit_resample(self.data, self.labels)
 
     def _normalize(self):
         train_amounts = self.train_data[:, -1].reshape(-1, 1)
