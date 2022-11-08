@@ -1,0 +1,11 @@
+watchdog
+matplotlib
+pandas
+numpy
+fastparquet
+sklearn
+imbalanced-learn
+plotly
+umap
+streamlit
+jupyter
