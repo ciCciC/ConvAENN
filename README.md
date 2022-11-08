@@ -26,19 +26,21 @@ This repo consist of an anomaly detection system (ADS) using AutoEncoder Neural 
 <br/>
 Data page
 <br/>
-<img src="images/0.png" width="600" height="400">
+<img src="images/datapage_stats.png" width="600" height="400">
+<img src="images/datapage_single.png" width="600" height="400">
+<img src="images/datapage_vis.png" width="600" height="400">
 
 <br/>
 Train page
 <br/>
-<img src="images/11.png" width="600" height="400">
+<img src="images/trainpage.png" width="600" height="400">
 
 <br/>
-Evaluate page part 1
+Evaluate metrics
 <br/>
-<img src="images/metric.png" width="600" height="400">
+<img src="images/eva_threshold.png" width="600" height="400">
 
 <br/>
-Evaluate page part 2
+Evaluate test model
 <br/>
-<img src="images/evaluate.png" width="600" height="400">
+<img src="images/eva_test.png" width="600" height="400">
