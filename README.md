@@ -12,11 +12,11 @@ This repo consist of an anomaly detector system (ADS) using AutoEncoder Neural N
 ## Prerequisite
 - install miniforge
 - create virtual env
-- pip install watchdog matplotlib pandas numpy fastparquet sklearn imbalanced-learn jupyter
-- pip install streamlit
+- from root enter the following command line:
+  - ```pip install -r requirements.txt```
 - **WINDOWS**
-  - conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
-  - pip install tensorflow
+  - ```conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0```
+  - ```pip install tensorflow```
 - **MACOS**
   - tensorflow [installer](https://developer.apple.com/metal/tensorflow-plugin/) for MPS
 - run application from terminal:
