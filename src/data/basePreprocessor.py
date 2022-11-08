@@ -4,6 +4,8 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from abc import ABC, abstractmethod
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
 
 
 class BasePreprocessor(ABC):
@@ -52,9 +54,16 @@ class CreditProcessor(BasePreprocessor):
         self.labels = 1 - self.raw_data[:, -1]
         self.data = self.raw_data[:, 1:-1]
 
+        self._over_under_sample()
         self._train_split_data()
         self._normalize()
         self._split_normal_and_anomalies()
+
+    def _over_under_sample(self):
+        over_sampler = SMOTE(sampling_strategy=.1, n_jobs=-1)
+        under_sampler = RandomUnderSampler(sampling_strategy=.3)
+        x_over, y_over = over_sampler.fit_resample(self.data, self.labels)
+        self.data, self.labels = under_sampler.fit_resample(x_over, y_over)
 
     def _normalize(self):
         train_amounts = self.train_data[:, -1].reshape(-1, 1)
