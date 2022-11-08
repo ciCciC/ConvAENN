@@ -1,6 +1,6 @@
-# Anomaly Detector Application
+# Anomaly Detection Application
 
-This repo consist of an anomaly detector system (ADS) using AutoEncoder Neural Net developed with Tensorflow and hosted within the framework of Streamlit. ADS has integrated default data sets that can be utilized for analysis and training purposes.
+This repo consist of an anomaly detection system (ADS) using AutoEncoder Neural Net developed with Tensorflow and hosted within the framework of Streamlit. ADS has integrated default data sets (Electrocardiogram & Creditcard fraud) that can be utilized for analysis and training purposes.
 
 ## Data sets (transformed to Parquet)
 - [Electrocardiogram (Google)](https://storage.googleapis.com/download.tensorflow.org/data/ecg.csv)

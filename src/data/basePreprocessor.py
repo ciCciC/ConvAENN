@@ -81,12 +81,12 @@ class CreditProcessor(BasePreprocessor):
         self.labels = 1 - self.raw_data[:, -1]
         self.data = self.raw_data[:, 1:-1]
 
-        self._over_under_sample()
+        self._under_sample()
         self._train_split_data()
         self._normalize()
         self._split_normal_and_anomalies()
 
-    def _over_under_sample(self):
+    def _under_sample(self):
         under_sampler = RandomUnderSampler(sampling_strategy=.1)
         self.data, self.labels = under_sampler.fit_resample(self.data, self.labels)
 
